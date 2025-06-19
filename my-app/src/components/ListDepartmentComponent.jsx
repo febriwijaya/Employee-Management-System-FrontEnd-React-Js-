@@ -1,11 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { getAllDepartments } from "../services/DepartmentService";
-import { Link } from "react-router-dom";
+import {
+  deleteDepartment,
+  getAllDepartments,
+} from "../services/DepartmentService";
+import { Link, useNavigate } from "react-router-dom";
 
 export const ListDepartmentComponent = () => {
   const [departments, setDepartments] = useState([]);
 
+  const navigator = useNavigate();
+
   useEffect(() => {
+    listOfDepartment();
+  }, []);
+
+  function listOfDepartment() {
     getAllDepartments()
       .then((response) => {
         console.log(response.data);
@@ -14,7 +23,22 @@ export const ListDepartmentComponent = () => {
       .catch((error) => {
         console.error(error);
       });
-  }, []);
+  }
+
+  function updateDepartment(id) {
+    navigator(`/edit-department/${id}`);
+  }
+
+  function removeDepartment(id) {
+    deleteDepartment(id)
+      .then((response) => {
+        console.log(response.data);
+        listOfDepartment();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
 
   return (
     <div className="container">
@@ -28,6 +52,7 @@ export const ListDepartmentComponent = () => {
             <th>Department ID</th>
             <th>Department Name</th>
             <th>Department Description</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -36,6 +61,20 @@ export const ListDepartmentComponent = () => {
               <td>{department.id}</td>
               <td>{department.departmentName}</td>
               <td>{department.departmentDescription}</td>
+              <td>
+                <button
+                  onClick={() => updateDepartment(department.id)}
+                  className="btn btn-info mx-2"
+                >
+                  Update
+                </button>
+                <button
+                  onClick={() => removeDepartment(department.id)}
+                  className="btn btn-danger"
+                >
+                  Delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

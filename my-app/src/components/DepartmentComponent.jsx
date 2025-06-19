@@ -1,21 +1,70 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  createDepartment,
+  getDepartmentById,
+  updatedDepartment,
+} from "../services/DepartmentService";
+import { useNavigate, useParams } from "react-router-dom";
 
 const DepartmentComponent = () => {
   const [departmentName, setDepartmentName] = useState("");
   const [departmentDescription, setDepartmentDescription] = useState("");
 
-  function saveDepartment(e) {
+  const { id } = useParams();
+
+  const navigator = useNavigate();
+
+  useEffect(() => {
+    getDepartmentById(id)
+      .then((response) => {
+        setDepartmentName(response.data.departmentName);
+        setDepartmentDescription(response.data.departmentDescription);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, [id]);
+
+  function saveOrUpdateDepartment(e) {
     e.preventDefault();
 
     const department = { departmentName, departmentDescription };
     console.log(department);
+
+    if (id) {
+      updatedDepartment(id, department)
+        .then((response) => {
+          console.log(response.data);
+          navigator("/departments");
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      createDepartment(department)
+        .then((response) => {
+          console.log(response.data);
+          navigator("/departments");
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  }
+
+  function pageTitle() {
+    if (id) {
+      return <h2 className="text-center">Updated Department</h2>;
+    } else {
+      return <h2 className="text-center">Add Department</h2>;
+    }
   }
 
   return (
     <div className="container mt-4">
       <div className="row">
         <div className="card col-md-6 offset-md-3 offset-md-3">
-          <h2 className="text-center">Add Department</h2>
+          {pageTitle()}
 
           <div className="card-body">
             <form>
@@ -48,7 +97,7 @@ const DepartmentComponent = () => {
               </div>
               <button
                 className="btn btn-success mb-2"
-                onClick={(e) => saveDepartment(e)}
+                onClick={(e) => saveOrUpdateDepartment(e)}
               >
                 Submit
               </button>
